@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Datos del smn
+datohorario*.txt
+
 # C extensions
 *.so
 
