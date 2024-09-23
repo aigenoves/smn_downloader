@@ -2,14 +2,15 @@ import re
 from pathlib import Path
 from datetime import datetime
 from typing import Any
+import pandas as pd
 
-# Definir la regex
+
 pattern = re.compile(
     r"(\d{8})\s+(\d+)\s+([\d.]+)\s+(\d+)\s+([\d.]+)\s+(\d+)\s+([\d.]+)\s+(.+)"
 )
 
 
-def datohorario(data_file: Path) -> list[Any]:
+def datohorario(data_file: Path) -> pd.DataFrame:
     """
     Recorre todas las carpetas en la ruta dada, parsea los archivos de texto usando regex y
     genera un único archivo parquet de salida.
@@ -48,4 +49,15 @@ def datohorario(data_file: Path) -> list[Any]:
                         location,
                     ]
                 )
-    return all_data
+    return pd.DataFrame(
+        all_data,
+        columns=[
+            "fecha_hora",
+            "temperatura",
+            "humedad",
+            "presion",
+            "viento_d",
+            "viento_v",
+            "ubicacion",
+        ],
+    )
