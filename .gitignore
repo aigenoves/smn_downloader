@@ -5,6 +5,7 @@ __pycache__/
 
 # Datos del smn
 datohorario*.txt
+*.parquet
 
 # C extensions
 *.so
