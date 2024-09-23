@@ -9,14 +9,13 @@ pattern = re.compile(
 )
 
 
-def datohorario(data_file: Path, output_file: Path) -> list[Any]:
+def datohorario(data_file: Path) -> list[Any]:
     """
     Recorre todas las carpetas en la ruta dada, parsea los archivos de texto usando regex y
     genera un único archivo parquet de salida.
 
     Args:
         data_dir (Path): Ruta al directorio base (por ejemplo, "data").
-        output_file (Path): Nombre del archivo parquet a generar.
     """
 
     all_data = []
