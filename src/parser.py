@@ -4,9 +4,8 @@ from datetime import datetime
 from typing import Any
 import pandas as pd
 
-
 pattern = re.compile(
-    r"(\d{8})\s+(\d+)\s+([\d.]+)\s+(\d+)\s+([\d.]+)\s+(\d+)\s+([\d.]+)\s+(.+)"
+    r"(\d{8})\s+(\d+)\s+(-?[\d.]+)\s+(\d+)\s+(-?[\d.]+)\s+(\d+)\s+(-?[\d.]+)\s+(.+)"
 )
 
 
