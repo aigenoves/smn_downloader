@@ -4,10 +4,6 @@ from datetime import datetime
 from typing import Any
 import pandas as pd
 
-pattern = re.compile(
-    r"(\d{8})\s+(\d+)\s+(-?[\d.]+)\s+(\d+)\s+(-?[\d.]+)\s+(\d+)\s+(-?[\d.]+)\s+(.+)"
-)
-
 
 def datohorario(data_file: Path) -> pd.DataFrame:
     """
@@ -22,17 +18,28 @@ def datohorario(data_file: Path) -> pd.DataFrame:
     with open(data_file, "r", encoding="latin-1") as file:
         lines = file.readlines()
         for line in lines:
-            match = pattern.match(line)
-            if match:
-                messure_date = datetime.strptime(match.group(1), "%d%m%Y")
-
-                hour = f"{int(match.group(2)):02d}:00"  # Hora
-                temperature = float(match.group(3))  # Temperatura
-                humidity = int(match.group(4))  # Humedad
-                pressure = float(match.group(5))  # Presión
-                wind_dir = int(match.group(6))  # Direccion del viento
-                wind_vel = float(match.group(7))  # Velocidad del viento
-                location = match.group(8).strip()  # Ubicación
+            if line[0].isdigit():
+                print(
+                    f"{line[0:8]}-{line[8:14]}-{line[20:25]}-{line[38:45].strip()}-{line[45:].strip()}"
+                )
+                messure_date = datetime.strptime(line[0:8].strip(), "%d%m%Y")
+                hour = f"{int(line[8:14].strip()):02d}:00"  # Hora
+                temperature = (
+                    float(line[14:20].strip()) if line[14:20].strip() != "" else 0
+                )  # Temperatura
+                humidity = (
+                    int(line[20:25].strip()) if line[20:25].strip() != "" else 0
+                )  # Humedad
+                pressure = (
+                    float(line[25:33].strip()) if line[25:33].strip() != "" else 0
+                )  # Presión
+                wind_dir = (
+                    int(line[33:38].strip()) if line[33:38].strip() != "" else 0
+                )  # Direccion del viento
+                wind_vel = (
+                    float(line[38:45].strip()) if line[38:45].strip() != "" else 0
+                )  # Velocidad del viento
+                location = line[45:].strip()  # Ubicación
                 fecha_hora = datetime.combine(
                     messure_date.date(), datetime.strptime(hour, "%H:%M").time()
                 )
