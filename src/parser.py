@@ -19,9 +19,6 @@ def datohorario(data_file: Path) -> pd.DataFrame:
         lines = file.readlines()
         for line in lines:
             if line[0].isdigit():
-                print(
-                    f"{line[0:8]}-{line[8:14]}-{line[20:25]}-{line[38:45].strip()}-{line[45:].strip()}"
-                )
                 messure_date = datetime.strptime(line[0:8].strip(), "%d%m%Y")
                 hour = f"{int(line[8:14].strip()):02d}:00"  # Hora
                 temperature = (
