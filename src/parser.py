@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Any
 import pandas as pd
+from .utils import coords_dms_to
 
 
 def datohorario(data_file: Path) -> pd.DataFrame:
@@ -62,5 +63,49 @@ def datohorario(data_file: Path) -> pd.DataFrame:
             "viento_d",
             "viento_v",
             "ubicacion",
+        ],
+    )
+
+
+def estaciones(data_file: Path) -> pd.DataFrame:
+    all_data = []
+    with open(data_file, "r", encoding="latin-1") as file:
+        lines = file.readlines()[1:]
+        for i, line in enumerate(lines):
+            print(f"{i}: {line[57:62]}")
+            station_name = line[0:34].strip()
+            state_name = line[34:54].strip()
+            lat_degree = int(line[54:57].strip())
+            lat_minute = int(line[57:62].strip())
+            lon_degree = int(line[62:69].strip())
+            lon_minute = int(line[69:74].strip())
+            height = int(line[74:81].strip())
+            number = int(line[81:90].strip())
+            oaci_code = line[90:].strip()
+
+            all_data.append(
+                [
+                    station_name,
+                    state_name,
+                    coords_dms_to(
+                        lat_degree,
+                        lat_minute,
+                    ),
+                    coords_dms_to(lon_degree, lon_minute),
+                    height,
+                    number,
+                    oaci_code,
+                ]
+            )
+    return pd.DataFrame(
+        all_data,
+        columns=[
+            "nombre",
+            "provincia",
+            "lat",
+            "lon",
+            "altura",
+            "numero",
+            "oaci",
         ],
     )

@@ -27,3 +27,9 @@ def generate_dates_until_today(
         current_date += datetime.timedelta(days=1)
 
     return dates
+
+
+def coords_dms_to(degrees: int, minutes: int) -> float:
+    decimal = degrees + (-minutes / 60)
+    print(degrees, minutes, decimal)
+    return decimal

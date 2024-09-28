@@ -29,6 +29,7 @@ def download(start_date: datetime.date, end_date: datetime.date, out_file_name: 
     dates_list = generate_dates_until_today(start_date, end_date)
 
     last_five_downloads = []
+
     text_area_placeholder = st.empty()
 
     for day in dates_list:
@@ -38,18 +39,17 @@ def download(start_date: datetime.date, end_date: datetime.date, out_file_name: 
         url: str = (
             f"https://ssl.smn.gob.ar/dpd/descarga_opendata.php?file=observaciones/datohorario{day}.txt"
         )
+        if not save_path.exists():
+            fetch_daily_data(url, save_path)
+            last_five_downloads.append(file_name)
 
-        fetch_daily_data(url, save_path)
-        last_five_downloads.append(file_name)
-
-        if len(last_five_downloads) > 5:
-            last_five_downloads.pop(0)
-
-        with text_area_placeholder.container():
-            text_area_content = "\n".join(last_five_downloads)
-            text_area_placeholder.text_area(
-                "Archivos descargados:", text_area_content, height=200
-            )
+            if len(last_five_downloads) > 5:
+                last_five_downloads.pop(0)
+                with text_area_placeholder.container():
+                    text_area_content = "\n".join(last_five_downloads)
+                    text_area_placeholder.text_area(
+                        "Archivos descargados:", text_area_content, height=200
+                    )
 
     st.success("¡Todos los archivos han sido descargados!")
 
@@ -64,22 +64,27 @@ def download(start_date: datetime.date, end_date: datetime.date, out_file_name: 
             previus_data = datahorario_smn
 
         previus_data = pd.concat([previus_data, datahorario_smn], ignore_index=True)
+
     previus_data.to_parquet(output_parquet_file, engine="pyarrow")
 
 
 st.title("Descargar datos diarios desde el SMN")
 
 
-output_file_name = st.text_input("Nombre del arhivo de salida:")
-
-start_date, end_date = st.date_input(
-    "Seleccione un rango de fechas",
-    value=(min_date, max_date),
-    min_value=min_date,
-    max_value=max_date,
-    format="DD/MM/YYYY",
+output_file_name = st.text_input(
+    "Nombre del arhivo de salida:", value="datosdiarios_smn.parquet"
 )
 
+try:
+    start_date, end_date = st.date_input(
+        "Seleccione un rango de fechas",
+        value=(min_date, max_date),
+        min_value=min_date,
+        max_value=max_date,
+        format="DD/MM/YYYY",
+    )
+except ValueError:
+    st.error("Por favor, seleccione un rango de fechas")
 
 if st.button("Descargar información"):
     if output_file_name and start_date and end_date:
