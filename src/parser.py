@@ -6,6 +6,16 @@ import pandas as pd
 from .utils import coords_dms_to
 
 
+main_path = Path(__file__).resolve()
+main_directory = main_path.parent.parent
+relative_path = main_directory / "data"
+stations_smn_file = relative_path / "estaciones_smn.parquet"
+df = pd.read_parquet(stations_smn_file)
+
+
+stations_names = df["nombre"].tolist()
+
+
 def datohorario(data_file: Path) -> pd.DataFrame:
     """
     Recorre todas las carpetas en la ruta dada, parsea los archivos de texto usando regex y
@@ -41,18 +51,19 @@ def datohorario(data_file: Path) -> pd.DataFrame:
                 fecha_hora = datetime.combine(
                     messure_date.date(), datetime.strptime(hour, "%H:%M").time()
                 )
+                if location in stations_names:
+                    all_data.append(
+                        [
+                            fecha_hora,
+                            temperature,
+                            humidity,
+                            pressure,
+                            wind_dir,
+                            wind_vel,
+                            location,
+                        ]
+                    )
 
-                all_data.append(
-                    [
-                        fecha_hora,
-                        temperature,
-                        humidity,
-                        pressure,
-                        wind_dir,
-                        wind_vel,
-                        location,
-                    ]
-                )
     return pd.DataFrame(
         all_data,
         columns=[
