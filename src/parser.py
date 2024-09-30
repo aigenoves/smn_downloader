@@ -3,7 +3,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Any
 import pandas as pd
-from .utils import coords_dms_to
+from .utils import coords_dms_to, Logger
 
 
 main_path = Path(__file__).resolve()
@@ -63,6 +63,9 @@ def datohorario(data_file: Path) -> pd.DataFrame:
                             location,
                         ]
                     )
+                else:
+                    message = f"No existe la estacion con nombre {location} archivo: {str(data_file).split('/')[-1]}"
+                    Logger.add_to_log("warning", message=message)
 
     return pd.DataFrame(
         all_data,
