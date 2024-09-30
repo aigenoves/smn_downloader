@@ -3,7 +3,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Any
 import pandas as pd
-from .utils import coords_dms_to, Logger
+from .utils import coords_dms_to, Logger, replace_station_name
 
 
 main_path = Path(__file__).resolve()
@@ -26,7 +26,7 @@ def datohorario(data_file: Path) -> pd.DataFrame:
     """
 
     all_data = []
-    with open(data_file, "r", encoding="latin-1") as file:
+    with open(data_file, "r", encoding="latin1") as file:
         lines = file.readlines()
         for line in lines:
             if line[0].isdigit():
@@ -47,7 +47,11 @@ def datohorario(data_file: Path) -> pd.DataFrame:
                 wind_vel = (
                     float(line[38:45].strip()) if line[38:45].strip() != "" else 0
                 )  # Velocidad del viento
-                location = line[45:].strip()  # Ubicación
+                location = (
+                    line[45:].strip()
+                    if line[45:].strip()[0:5] != "PCIA."
+                    else replace_station_name("PCIA.")
+                )  # Ubicación
                 fecha_hora = datetime.combine(
                     messure_date.date(), datetime.strptime(hour, "%H:%M").time()
                 )
@@ -63,6 +67,21 @@ def datohorario(data_file: Path) -> pd.DataFrame:
                             location,
                         ]
                     )
+                elif replace_station_name(location) != "":
+                    all_data.append(
+                        [
+                            fecha_hora,
+                            temperature,
+                            humidity,
+                            pressure,
+                            wind_dir,
+                            wind_vel,
+                            replace_station_name(location),
+                        ]
+                    )
+                    message = f"{location}->{replace_station_name(location)} archivo: {str(data_file).split('/')[-1]}"
+                    Logger.add_to_log("info", message=message)
+
                 else:
                     message = f"No existe la estacion con nombre {location} archivo: {str(data_file).split('/')[-1]}"
                     Logger.add_to_log("warning", message=message)

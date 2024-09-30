@@ -4,6 +4,22 @@ import logging
 import logging.handlers
 import traceback
 
+STATIONS_REPLACEMENTS_NAME = {
+    "ESCUELA DE AVIACION MILITA": "ESCUELA DE AVIACION MILITAR AERO",
+    "ESC.AVIACION MILITAR AERO": "ESCUELA DE AVIACION MILITAR AERO",
+    "PRESIDENCIA ROQUE SAENZ PE": "PRESIDENCIA ROQUE SAENZ PENA AERO",
+    "PCIA.": "PRESIDENCIA ROQUE SAENZ PENA AERO",
+    "VILLA DE MARIA DEL RIO SEC": "VILLA DE MARIA DEL RIO SECO",
+    "VILLA MARIA DEL RIO SECO": "VILLA DE MARIA DEL RIO SECO",
+    "BUENOS AIRES": "BUENOS AIRES OBSERVATORIO",
+    "LA QUIACA OBS.": "LA QUIACA OBSERVATORIO",
+    "LAS FLORES AERO": "LAS FLORES",
+    "OBERA AERO": "OBERA",
+    "PILAR OBS.": "PILAR OBSERVATORIO",
+    "SAN FERNANDO": "SAN FERNANDO AERO",
+    "VENADO TUERTO": "VENADO TUERTO AERO",
+}
+
 
 class Logger:
 
@@ -15,10 +31,10 @@ class Logger:
         log_file = relative_path / "app.log"
 
         logger = logging.getLogger(__name__)
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(logging.INFO)
 
         file_handler = logging.FileHandler(log_file, encoding="latin1")
-        file_handler.setLevel(logging.DEBUG)
+        file_handler.setLevel(logging.INFO)
 
         formatter = logging.Formatter(
             "%(asctime)s | %(levelname)s | %(message)s", "%d-%m-%Y %H:%M:%S"
@@ -81,3 +97,7 @@ def coords_dms_to(degrees: int, minutes: int) -> float:
     decimal = degrees + (-minutes / 60)
     print(degrees, minutes, decimal)
     return decimal
+
+
+def replace_station_name(name: str) -> str:
+    return STATIONS_REPLACEMENTS_NAME.get(name, "")
