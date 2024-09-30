@@ -3,11 +3,17 @@ from pathlib import Path
 from datetime import datetime
 from typing import Any
 import pandas as pd
+from .utils import coords_dms_to
 
 
-pattern = re.compile(
-    r"(\d{8})\s+(\d+)\s+([\d.]+)\s+(\d+)\s+([\d.]+)\s+(\d+)\s+([\d.]+)\s+(.+)"
-)
+main_path = Path(__file__).resolve()
+main_directory = main_path.parent.parent
+relative_path = main_directory / "data"
+stations_smn_file = relative_path / "estaciones_smn.parquet"
+df = pd.read_parquet(stations_smn_file)
+
+
+stations_names = df["nombre"].tolist()
 
 
 def datohorario(data_file: Path) -> pd.DataFrame:
@@ -23,32 +29,41 @@ def datohorario(data_file: Path) -> pd.DataFrame:
     with open(data_file, "r", encoding="latin-1") as file:
         lines = file.readlines()
         for line in lines:
-            match = pattern.match(line)
-            if match:
-                messure_date = datetime.strptime(match.group(1), "%d%m%Y")
-
-                hour = f"{int(match.group(2)):02d}:00"  # Hora
-                temperature = float(match.group(3))  # Temperatura
-                humidity = int(match.group(4))  # Humedad
-                pressure = float(match.group(5))  # Presión
-                wind_dir = int(match.group(6))  # Direccion del viento
-                wind_vel = float(match.group(7))  # Velocidad del viento
-                location = match.group(8).strip()  # Ubicación
+            if line[0].isdigit():
+                messure_date = datetime.strptime(line[0:8].strip(), "%d%m%Y")
+                hour = f"{int(line[8:14].strip()):02d}:00"  # Hora
+                temperature = (
+                    float(line[14:20].strip()) if line[14:20].strip() != "" else 0
+                )  # Temperatura
+                humidity = (
+                    int(line[20:25].strip()) if line[20:25].strip() != "" else 0
+                )  # Humedad
+                pressure = (
+                    float(line[25:33].strip()) if line[25:33].strip() != "" else 0
+                )  # Presión
+                wind_dir = (
+                    int(line[33:38].strip()) if line[33:38].strip() != "" else 0
+                )  # Direccion del viento
+                wind_vel = (
+                    float(line[38:45].strip()) if line[38:45].strip() != "" else 0
+                )  # Velocidad del viento
+                location = line[45:].strip()  # Ubicación
                 fecha_hora = datetime.combine(
                     messure_date.date(), datetime.strptime(hour, "%H:%M").time()
                 )
+                if location in stations_names:
+                    all_data.append(
+                        [
+                            fecha_hora,
+                            temperature,
+                            humidity,
+                            pressure,
+                            wind_dir,
+                            wind_vel,
+                            location,
+                        ]
+                    )
 
-                all_data.append(
-                    [
-                        fecha_hora,
-                        temperature,
-                        humidity,
-                        pressure,
-                        wind_dir,
-                        wind_vel,
-                        location,
-                    ]
-                )
     return pd.DataFrame(
         all_data,
         columns=[
@@ -59,5 +74,49 @@ def datohorario(data_file: Path) -> pd.DataFrame:
             "viento_d",
             "viento_v",
             "ubicacion",
+        ],
+    )
+
+
+def estaciones(data_file: Path) -> pd.DataFrame:
+    all_data = []
+    with open(data_file, "r", encoding="latin-1") as file:
+        lines = file.readlines()[1:]
+        for i, line in enumerate(lines):
+            print(f"{i}: {line[57:62]}")
+            station_name = line[0:34].strip()
+            state_name = line[34:54].strip()
+            lat_degree = int(line[54:57].strip())
+            lat_minute = int(line[57:62].strip())
+            lon_degree = int(line[62:69].strip())
+            lon_minute = int(line[69:74].strip())
+            height = int(line[74:81].strip())
+            number = int(line[81:90].strip())
+            oaci_code = line[90:].strip()
+
+            all_data.append(
+                [
+                    station_name,
+                    state_name,
+                    coords_dms_to(
+                        lat_degree,
+                        lat_minute,
+                    ),
+                    coords_dms_to(lon_degree, lon_minute),
+                    height,
+                    number,
+                    oaci_code,
+                ]
+            )
+    return pd.DataFrame(
+        all_data,
+        columns=[
+            "nombre",
+            "provincia",
+            "lat",
+            "lon",
+            "altura",
+            "numero",
+            "oaci",
         ],
     )

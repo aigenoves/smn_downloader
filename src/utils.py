@@ -1,4 +1,52 @@
 import datetime
+from pathlib import Path
+import logging
+import logging.handlers
+import traceback
+
+
+class Logger:
+
+    def __set_logger(self) -> logging.Logger:
+
+        main_path = Path(__file__).resolve()
+        main_directory = main_path.parent.parent
+        relative_path = main_directory / "logs"
+        log_file = relative_path / "app.log"
+
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.DEBUG)
+
+        file_handler = logging.FileHandler(log_file, encoding="latin1")
+        file_handler.setLevel(logging.DEBUG)
+
+        formatter = logging.Formatter(
+            "%(asctime)s | %(levelname)s | %(message)s", "%d-%m-%Y %H:%M:%S"
+        )
+        file_handler.setFormatter(formatter)
+
+        if logger.hasHandlers():
+            logger.handlers.clear()
+        logger.addHandler(file_handler)
+        return logger
+
+    @classmethod
+    def add_to_log(cls, level: str, message: str) -> None:
+        try:
+            logger = cls.__set_logger(cls)
+            if level == "critical":
+                logger.critical(message)
+            elif level == "debug":
+                logger.debug(message)
+            elif level == "error":
+                logger.error(message)
+            elif level == "info":
+                logger.info(message)
+            elif level == "warning":
+                logger.warning(message)
+        except Exception as e:
+            print(traceback.format_exc())
+            print(e)
 
 
 def generate_dates_until_today(
@@ -27,3 +75,9 @@ def generate_dates_until_today(
         current_date += datetime.timedelta(days=1)
 
     return dates
+
+
+def coords_dms_to(degrees: int, minutes: int) -> float:
+    decimal = degrees + (-minutes / 60)
+    print(degrees, minutes, decimal)
+    return decimal
