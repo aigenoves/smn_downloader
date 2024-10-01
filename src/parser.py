@@ -33,19 +33,19 @@ def datohorario(data_file: Path) -> pd.DataFrame:
                 messure_date = datetime.strptime(line[0:8].strip(), "%d%m%Y")
                 hour = f"{int(line[8:14].strip()):02d}:00"  # Hora
                 temperature = (
-                    float(line[14:20].strip()) if line[14:20].strip() != "" else 0
+                    float(line[14:20].strip()) if line[14:20].strip() != "" else None
                 )  # Temperatura
                 humidity = (
-                    int(line[20:25].strip()) if line[20:25].strip() != "" else 0
+                    int(line[20:25].strip()) if line[20:25].strip() != "" else None
                 )  # Humedad
                 pressure = (
-                    float(line[25:33].strip()) if line[25:33].strip() != "" else 0
+                    float(line[25:33].strip()) if line[25:33].strip() != "" else None
                 )  # Presión
                 wind_dir = (
-                    int(line[33:38].strip()) if line[33:38].strip() != "" else 0
+                    int(line[33:38].strip()) if line[33:38].strip() != "" else None
                 )  # Direccion del viento
                 wind_vel = (
-                    float(line[38:45].strip()) if line[38:45].strip() != "" else 0
+                    float(line[38:45].strip()) if line[38:45].strip() != "" else None
                 )  # Velocidad del viento
                 location = (
                     line[45:].strip()
