@@ -54,16 +54,23 @@ def download(start_date: datetime.date, end_date: datetime.date, out_file_name: 
     st.success("¡Todos los archivos han sido descargados!")
 
     output_parquet_file = relative_path / output_file_name
-    previus_data = pd.DataFrame()
+
     if os.path.exists(output_parquet_file):
         previus_data = pd.read_parquet(output_parquet_file, engine="pyarrow")
+    else:
+        previus_data = pd.DataFrame()
 
+    new_data = []
     for txt_file in relative_path.rglob("*.txt"):
         datahorario_smn = parser.datohorario(txt_file)
-        if previus_data.empty:
-            previus_data = datahorario_smn
+        new_data.append(datahorario_smn)
 
-        previus_data = pd.concat([previus_data, datahorario_smn], ignore_index=True)
+    if new_data:
+        new_data = pd.concat(new_data, ignore_index=True)
+        if previus_data.empty:
+            previus_data = new_data
+        else:
+            previus_data = pd.concat([previus_data, datahorario_smn], ignore_index=True)
 
     previus_data.to_parquet(output_parquet_file, engine="pyarrow")
 
