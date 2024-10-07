@@ -26,65 +26,79 @@ def datohorario(data_file: Path) -> pd.DataFrame:
     """
 
     all_data = []
-    with open(data_file, "r", encoding="latin1") as file:
-        lines = file.readlines()
-        for line in lines:
-            if line[0].isdigit():
-                messure_date = datetime.strptime(line[0:8].strip(), "%d%m%Y")
-                hour = f"{int(line[8:14].strip()):02d}:00"  # Hora
-                temperature = (
-                    float(line[14:20].strip()) if line[14:20].strip() != "" else None
-                )  # Temperatura
-                humidity = (
-                    int(line[20:25].strip()) if line[20:25].strip() != "" else None
-                )  # Humedad
-                pressure = (
-                    float(line[25:33].strip()) if line[25:33].strip() != "" else None
-                )  # Presión
-                wind_dir = (
-                    int(line[33:38].strip()) if line[33:38].strip() != "" else None
-                )  # Direccion del viento
-                wind_vel = (
-                    float(line[38:45].strip()) if line[38:45].strip() != "" else None
-                )  # Velocidad del viento
-                location = (
-                    line[45:].strip()
-                    if line[45:].strip()[0:5] != "PCIA."
-                    else replace_station_name("PCIA.")
-                )  # Ubicación
-                fecha_hora = datetime.combine(
-                    messure_date.date(), datetime.strptime(hour, "%H:%M").time()
-                )
-                if location in stations_names:
-                    all_data.append(
-                        [
-                            fecha_hora,
-                            temperature,
-                            humidity,
-                            pressure,
-                            wind_dir,
-                            wind_vel,
-                            location,
-                        ]
-                    )
-                elif replace_station_name(location) != "":
-                    all_data.append(
-                        [
-                            fecha_hora,
-                            temperature,
-                            humidity,
-                            pressure,
-                            wind_dir,
-                            wind_vel,
-                            replace_station_name(location),
-                        ]
-                    )
-                    message = f"{location}->{replace_station_name(location)} archivo: {str(data_file).split('/')[-1]}"
-                    Logger.add_to_log("info", message=message)
 
-                else:
-                    message = f"No existe la estacion con nombre {location} archivo: {str(data_file).split('/')[-1]}"
-                    Logger.add_to_log("warning", message=message)
+    try:
+        with open(data_file, "r", encoding="latin1") as file:
+            lines = file.readlines()
+            for line in lines:
+                if line[0].isdigit():
+                    messure_date = datetime.strptime(line[0:8].strip(), "%d%m%Y")
+                    hour = f"{int(line[8:14].strip()):02d}:00"  # Hora
+                    temperature = (
+                        float(line[14:20].strip())
+                        if line[14:20].strip() != ""
+                        else None
+                    )  # Temperatura
+                    humidity = (
+                        int(line[20:25].strip()) if line[20:25].strip() != "" else None
+                    )  # Humedad
+                    pressure = (
+                        float(line[25:33].strip())
+                        if line[25:33].strip() != ""
+                        else None
+                    )  # Presión
+                    wind_dir = (
+                        int(line[33:38].strip()) if line[33:38].strip() != "" else None
+                    )  # Direccion del viento
+                    wind_vel = (
+                        float(line[38:45].strip())
+                        if line[38:45].strip() != ""
+                        else None
+                    )  # Velocidad del viento
+                    location = (
+                        line[45:].strip()
+                        if line[45:].strip()[0:5] != "PCIA."
+                        else replace_station_name("PCIA.")
+                    )  # Ubicación
+                    fecha_hora = datetime.combine(
+                        messure_date.date(), datetime.strptime(hour, "%H:%M").time()
+                    )
+                    if location in stations_names:
+                        all_data.append(
+                            [
+                                fecha_hora,
+                                temperature,
+                                humidity,
+                                pressure,
+                                wind_dir,
+                                wind_vel,
+                                location,
+                            ]
+                        )
+                    elif replace_station_name(location) != "":
+                        all_data.append(
+                            [
+                                fecha_hora,
+                                temperature,
+                                humidity,
+                                pressure,
+                                wind_dir,
+                                wind_vel,
+                                replace_station_name(location),
+                            ]
+                        )
+                        message = f"{location}->{replace_station_name(location)} archivo: {str(data_file).split('/')[-1]}"
+                        Logger.add_to_log("info", message=message)
+
+                    else:
+                        message = f"No existe la estacion con nombre {location} archivo: {str(data_file).split('/')[-1]}"
+                        Logger.add_to_log("warning", message=message)
+    except FileNotFoundError:
+        message = f"No existe el archivo: f{data_file.name}"
+        Logger.add_to_log("error", message=message)
+    except IOError:
+        message = f"Error al abrir el archivo: f{data_file.name}"
+        Logger.add_to_log("critical", message=message)
 
     return pd.DataFrame(
         all_data,
