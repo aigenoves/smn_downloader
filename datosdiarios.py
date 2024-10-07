@@ -8,6 +8,7 @@ import pandas as pd
 from src.datodiario import fetch_daily_data
 from src.utils import generate_dates_until_today
 from src import parser
+from src.utils import Logger
 
 
 main_path = Path(__file__).resolve()
@@ -29,6 +30,7 @@ def download(start_date: datetime.date, end_date: datetime.date, out_file_name: 
     dates_list = generate_dates_until_today(start_date, end_date)
 
     last_five_downloads = []
+    files_to_process = []
 
     text_area_placeholder = st.empty()
 
@@ -42,6 +44,7 @@ def download(start_date: datetime.date, end_date: datetime.date, out_file_name: 
         if not save_path.exists():
             fetch_daily_data(url, save_path)
             last_five_downloads.append(file_name)
+            files_to_process.append(save_path)
 
             if len(last_five_downloads) > 5:
                 last_five_downloads.pop(0)
@@ -61,7 +64,9 @@ def download(start_date: datetime.date, end_date: datetime.date, out_file_name: 
         previus_data = pd.DataFrame()
 
     new_data = []
-    for txt_file in relative_path.rglob("*.txt"):
+    for txt_file in files_to_process:  # relative_path.rglob("*.txt"):
+        message = f"Procesado el archivo: {txt_file}"
+        Logger.add_to_log("info", message=message)
         datahorario_smn = parser.datohorario(txt_file)
         new_data.append(datahorario_smn)
 
